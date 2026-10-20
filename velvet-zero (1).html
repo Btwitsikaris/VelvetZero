@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velvet Zero | Pure Zero Refreshment</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;700&family=Galada&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--bg-inner:#f7f0e4;--bg-mid:#ebe1d0;--bg-outer:#cfc1a8;--muted:rgba(255,255,255,.7);--glass:rgba(255,255,255,.05);--gb:rgba(255,255,255,.1);--pink:#fbcfe8}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:radial-gradient(circle at center,var(--bg-inner) 0%,var(--bg-mid) 50%,var(--bg-outer) 100%);color:#fff;font-family:'Inter',sans-serif;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:90;pointer-events:none;opacity:0}
+#bubbles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.bubble{position:absolute;bottom:-50px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),rgba(255,255,255,.15) 45%,rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.3);animation:up linear forwards}
+@keyframes up{0%{transform:translate(0,0);opacity:0}10%,90%{opacity:.5}100%{transform:translate(30px,-110vh);opacity:0}}
+.header{display:flex;justify-content:space-between;align-items:center;padding:2rem 4%;position:fixed;top:env(safe-area-inset-top,0px);width:100%;z-index:100}
+.logo{display:flex;align-items:center;gap:.5rem;font:700 1.2rem 'Galada',cursive}
+.nav{display:flex;gap:.5rem;padding:.4rem;border-radius:100px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);box-shadow:0 8px 32px rgba(0,0,0,.1),inset 0 0 0 1px rgba(255,255,255,.1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.nav a{font:500 .85rem 'Manrope',sans-serif;color:var(--muted);text-decoration:none;padding:.5rem 1.2rem;border-radius:100px;transition:.3s}
+.nav a:hover,.nav a.active{background:var(--pink);color:#011d17}
+.contact-btn,.primary-btn{background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:100px;cursor:pointer;transition:.3s}
+.contact-btn{padding:.9rem 2rem;font-weight:600;font-size:.85rem}
+.contact-btn:hover,.primary-btn:hover{background:rgba(0,0,0,.7);transform:translateY(-3px)}
+.hero{height:100vh;display:flex;padding:5rem 4% 0;justify-content:space-between}
+.hero-left,.hero-right{display:flex;flex-direction:column;height:100%;padding:6rem 0;position:relative}
+.hero-left{gap:2rem}
+.title{font:400 clamp(5rem,10vw,12rem)/.8 'Galada',cursive;white-space:nowrap}
+.description{color:var(--muted);font-size:1.1rem;line-height:1.6;max-width:400px}
+.primary-btn{display:flex;align-items:center;gap:1.5rem;padding:.4rem .4rem .4rem 1.5rem;font-weight:700;width:fit-content}
+.plus{background:var(--pink);color:#011d17;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:1.4rem;font-weight:900;padding-bottom:2px}
+.award{display:flex;align-items:center;gap:1rem;margin-top:auto}
+.award-icon{width:48px;height:48px;background:var(--glass);border:1px solid var(--gb);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.award span{display:block}.award .t{font-size:.7rem;letter-spacing:.1em;color:var(--muted)}.award .s{font-size:.85rem;font-weight:600}
+.hero-right{align-items:flex-end;text-align:right;width:450px}
+.carousel{display:flex;flex-direction:column;gap:1.5rem;align-items:flex-end}
+.cards{display:flex;gap:1rem}
+.card{background:var(--glass);border:1px solid var(--gb);padding:1rem;padding-top:5rem;border-radius:28px;display:flex;flex-direction:column;align-items:center;gap:1.5rem;cursor:pointer;transition:.4s cubic-bezier(.175,.885,.32,1.275);width:135px;position:relative;backdrop-filter:blur(10px);text-align:center}
+.card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+.card.active{border-color:var(--pink)}
+.card svg{width:100px;height:175px;margin-top:-10rem;filter:drop-shadow(0 20px 25px rgba(0,0,0,.5));transition:transform .5s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.card:hover svg{transform:translateY(-30px) rotate(-12deg) scale(1.15)}
+.info{display:flex;flex-direction:column;font-size:.7rem}.info span:first-child{font-weight:600}.info span:last-child{color:var(--muted)}
+.arrows{display:flex;gap:1rem}
+.arrows button{background:var(--glass);border:1px solid var(--gb);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer}
+.arrows button:hover{background:rgba(255,255,255,.1)}
+.hero-right .title{margin-top:auto;position:relative;z-index:95}.carousel{position:relative;z-index:95}
+.page{position:fixed;inset:0;z-index:95;display:none;overflow-y:auto;background:radial-gradient(circle at center,var(--bg-inner) 0%,var(--bg-mid) 50%,var(--bg-outer) 100%);padding:8rem 4% 4rem}.page.open{display:block;animation:slideUp .6s cubic-bezier(.2,.8,.2,1)}@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}.award-icon{cursor:pointer;transition:.3s}.award-icon:hover{background:var(--pink);color:#011d17;transform:translateY(3px)}.wrap{max-width:1000px;margin:0 auto}.page h1{font:400 clamp(4rem,9vw,7rem)/1 'Galada',cursive;margin:1.5rem 0 .5rem}.lead{color:var(--muted);font-size:1.15rem;margin-bottom:2rem;max-width:560px;line-height:1.6}.page h3{font:400 2rem 'Galada',cursive;margin:2rem 0 1rem}.back{background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:100px;padding:.7rem 1.4rem;cursor:pointer;font:inherit}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}.tile{background:var(--glass);border:1px solid var(--gb);border-radius:28px;padding:1.6rem;backdrop-filter:blur(10px)}.tile h4{font-size:1.1rem;margin-bottom:.5rem}.tile p{color:var(--muted);line-height:1.6}.big{font:400 4rem 'Galada',cursive;color:var(--pink)}.page table{width:100%;max-width:420px;border-collapse:collapse}.page td{padding:.7rem 0;border-bottom:1px solid var(--gb)}.page td:last-child{text-align:right}.bar{display:flex;align-items:center;gap:1rem;margin-top:.8rem;font-size:.85rem}.bar span{width:80px;color:var(--muted)}.bar i{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.12)}.bar b{display:block;height:100%;border-radius:6px;background:var(--pink)}.prod{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.6rem}.qty{display:flex;align-items:center;gap:1rem}.qty button,.total button,.page form button{background:var(--pink);color:#011d17;border:none;border-radius:100px;min-width:38px;height:38px;padding:0 1.4rem;font-weight:700;cursor:pointer}.qty button{padding:0}.total{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;font-size:1.3rem}.page form{display:flex;flex-direction:column;gap:1rem;max-width:480px}.page input,.page textarea{padding:.9rem 1rem;border-radius:14px;border:1px solid var(--gb);background:rgba(0,0,0,.3);color:#fff;font:inherit}
+.modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(6px)}.modal.open{display:flex}.sheet{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:28px;padding:2rem;max-width:440px;width:90%;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.sheet h3{font:400 2.6rem 'Galada',cursive;margin-bottom:.8rem}.sheet p{color:var(--muted);line-height:1.6;margin-bottom:1.5rem}.sheet input{width:100%;padding:.8rem 1rem;border-radius:14px;border:1px solid var(--gb);background:rgba(0,0,0,.3);color:#fff;font:inherit;margin-bottom:1rem}.sheet button{background:var(--pink);color:#011d17;border:none;border-radius:100px;padding:.7rem 1.6rem;font-weight:700;cursor:pointer}.toast{position:fixed;bottom:2rem;left:50%;transform:translate(-50%,20px);opacity:0;z-index:300;background:rgba(0,0,0,.75);padding:.8rem 1.4rem;border-radius:100px;transition:.3s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1200px){.title{font-size:4rem}.hero{flex-direction:column;align-items:center;text-align:center}.hero-right{align-items:center;width:auto}.hero-left{align-items:center}.nav{display:none}}
+body{color:#161616}
+:root{--glass:rgba(0,0,0,.05);--gb:rgba(0,0,0,.12);--muted:rgba(0,0,0,.65)}
+.nav{background:rgba(255,255,255,.55);border-color:rgba(0,0,0,.12);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.contact-btn,.primary-btn{background:#161616}.contact-btn:hover,.primary-btn:hover{background:#000}
+.card.active{border-color:#d4122c}.card:hover{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.3)}
+.arrows button{color:#161616}.arrows button:hover{background:rgba(0,0,0,.08)}
+.bubble{background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),rgba(255,255,255,.3) 45%,rgba(0,0,0,.04));border-color:rgba(0,0,0,.15)}
+.back{background:#161616}.award-icon{color:#161616}
+
+/* ---- READABILITY FIXES ---- */
+/* 1. Keep all hero text above the 3D canvas (z-index 90) so the can/berries never cover it */
+.hero-left,.hero-right{z-index:95}
+.title,.description{text-shadow:none}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+/* 2. Right headline was wider than its 450px column and ran dark-on-dark over the can */
+.hero-right .title{font-size:clamp(3rem,5.5vw,5.5rem);line-height:.9}
+/* 3. Toast + modal inherited dark body text on a dark background */
+.toast{color:#fff}
+.sheet{color:#fff;--muted:rgba(255,255,255,.8)}
+/* 4. Form fields had white text on a translucent background over a light page */
+.page input,.page textarea{background:rgba(255,255,255,.7);color:#161616;border-color:rgba(0,0,0,.2)}
+.page input::placeholder,.page textarea::placeholder{color:rgba(0,0,0,.5)}
+/* 5. Progress-bar track was almost invisible on the light background */
+.bar i{background:rgba(0,0,0,.1)}
+/* 6. Small screens: columns were each 100vh tall and body had overflow:hidden, so text was cut off */
+@media(max-width:1200px){
+  html,body{height:auto;overflow-y:auto}
+  .hero{height:auto;min-height:100vh;padding-top:7rem;gap:2rem}
+  .hero-left,.hero-right{height:auto;padding:1.5rem 0}
+  .hero-right .title{margin-top:2rem}
+  .hero-left{padding-top:50vh}
+}
+
+
+/* Pink text/bars were invisible on the light background: use the red accent */
+.big{color:#d4122c}
+.bar b{background:#d4122c}
+.page h4 span[style*="--pink"]{color:#d4122c!important}
+
+.credit{margin-top:2.5rem;padding-top:1.2rem;border-top:1px solid var(--gb);color:var(--muted);font-size:.95rem}.credit strong{color:#161616;font-weight:600}
+
+</style>
+</head>
+<body>
+<div id="bubbles"></div>
+<header class="header">
+<div class="logo"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M7 14C9 8 14 7 17 8C16 12 12 16 7 14Z" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="#fbcfe8"/></svg><span>Velvet Zero</span></div>
+<nav class="nav"><a href="#" class="active">Home</a><a href="#">Ingredients</a><a href="#">Taste</a><a href="#">Eco</a><a href="#">Reviews</a></nav>
+<button class="contact-btn">Contact Us</button>
+</header>
+<main class="hero">
+<div class="hero-left">
+<h1 class="title"><span>Pure</span><br>Zero</h1>
+<p class="description">Unleash the crisp taste of zero sugar.<br>Refreshment redefined in every bubble —<br>all in one sleek design.</p>
+<button class="primary-btn">Shop Now<span class="plus">+</span></button>
+<div class="award"><div class="award-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15L15 18L19 14M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+</div>
+<div class="hero-right">
+<div class="carousel">
+<div class="cards">
+<div class="card active" data-flavor="classic"><svg viewBox="0 0 64 130"><rect x="8" y="10" width="48" height="112" rx="10" fill="#161616"/><rect x="8" y="98" width="48" height="8" fill="#13b79c"/><circle cx="26" cy="52" r="9" fill="#d4122c" stroke="#fff"/><circle cx="38" cy="49" r="10" fill="#d4122c" stroke="#fff"/><rect x="12" y="10" width="8" height="112" fill="#fff" opacity=".25"/><ellipse cx="32" cy="12" rx="22" ry="6" fill="#cfd6d8"/><text x="32" y="76" fill="#fff" font-family="Galada" font-size="20" text-anchor="middle">VZ</text></svg><div class="info"><span>Diet Classic</span><span>$2.99</span></div></div>
+<div class="card" data-flavor="blue"><svg viewBox="0 0 64 130"><rect x="8" y="10" width="48" height="112" rx="10" fill="#161616"/><rect x="8" y="98" width="48" height="8" fill="#2a86d8"/><circle cx="26" cy="52" r="9" fill="#d4122c" stroke="#fff"/><circle cx="38" cy="49" r="10" fill="#d4122c" stroke="#fff"/><rect x="12" y="10" width="8" height="112" fill="#fff" opacity=".25"/><ellipse cx="32" cy="12" rx="22" ry="6" fill="#cfd6d8"/><text x="32" y="76" fill="#fff" font-family="Galada" font-size="20" text-anchor="middle">VZ</text></svg><div class="info"><span>Zero Lime</span><span>$2.99</span></div></div>
+</div>
+<div class="arrows"><button aria-label="Previous">←</button><button aria-label="Next">→</button></div>
+</div>
+<h2 class="title"><span>Refreshingly</span><br>Clean</h2>
+</div>
+</main>
+<canvas id="gl"></canvas>
+<script>
+const W=()=>innerWidth,H=()=>innerHeight;
+const narrow=()=>innerWidth<1200; // mobile / tablet layout
+const intro={v:0},glEl=document.getElementById('gl');
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),alpha:true,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(30,1,.1,100);camera.position.z=12;
+// reflective environment built in code
+const envScene=new THREE.Scene();
+envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,32,16),new THREE.MeshBasicMaterial({color:0x4a5258,side:THREE.BackSide})));
+[[0,6,0,8,.5,8],[8,0,0,.6,8,4],[-8,1,3,.6,6,3],[0,-6,4,6,.4,2],[-8,-2,-2,.6,5,3],[3,3,9,5,.5,.5]].forEach(p=>{const m=new THREE.Mesh(new THREE.BoxGeometry(p[3],p[4],p[5]),new THREE.MeshBasicMaterial({color:0xffffff}));m.position.set(p[0],p[1],p[2]);envScene.add(m)});
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(envScene).texture;
+scene.add(new THREE.AmbientLight(0xffffff,.5));
+const key=new THREE.DirectionalLight(0xffffff,1.1);key.position.set(3,5,6);scene.add(key);
+
+// --- CAN ---
+const THEMES={classic:{c1:'#2b2b2b',c2:'#050505',name:'DIET CLASSIC'},blue:{c1:'#262a30',c2:'#04070b',name:'ZERO LIME'}};
+const lc=document.createElement('canvas');lc.width=1024;lc.height=512;
+const labelTex=new THREE.CanvasTexture(lc);labelTex.anisotropy=8;
+function drawLabel(k){
+  const t=THEMES[k],g=lc.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,512);gr.addColorStop(0,t.c1);gr.addColorStop(1,t.c2);
+  g.fillStyle=gr;g.fillRect(0,0,1024,512);
+  g.strokeStyle='rgba(220,230,235,.35)';g.lineWidth=1;
+  for(let i=0;i<26;i++){g.beginPath();for(let x=0;x<=1024;x+=16){const y=256+Math.sin(x/70+i*.35)*(40+i*6)*Math.cos(x/300);x?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}
+  g.fillStyle='#e8eef0';
+  [[40,60,70,10],[330,30,50,8],[440,470,90,10],[690,70,60,8],[850,450,80,10],[120,480,60,8],[560,20,40,8],[960,260,50,8]].forEach(r=>g.fillRect(r[0],r[1],r[2],r[3]));
+  g.textAlign='center';
+  [256,768].forEach(x=>{
+    g.save();g.translate(x,205);
+    g.fillStyle='#fff';g.beginPath();g.ellipse(0,0,150,110,-.15,0,7);g.fill();
+    g.fillStyle='#0b0b0b';g.beginPath();g.ellipse(0,0,138,98,-.15,0,7);g.fill();
+    [[-45,15,60],[40,5,66]].forEach(c=>{const r=g.createRadialGradient(c[0]-20,c[1]-25,5,c[0],c[1],c[2]);r.addColorStop(0,'#ff9a9a');r.addColorStop(.3,'#e0152f');r.addColorStop(1,'#6e0614');g.fillStyle=r;g.beginPath();g.arc(c[0],c[1],c[2],0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=5;g.stroke()});
+    g.fillStyle='#2f9c4a';g.beginPath();g.ellipse(10,-85,42,16,-.5,0,7);g.fill();
+    g.restore();
+    g.fillStyle='#fff';g.font='86px Galada, cursive';g.fillText('Velvet Zero',x,398);
+    g.font='600 34px Inter, sans-serif';g.fillText(t.name,x,452);
+    g.font='500 24px Inter, sans-serif';g.fillStyle='#fbcfe8';g.fillText('ORIGINAL ZERO SUGAR',x,62);
+  });
+  labelTex.needsUpdate=true;
+}
+drawLabel('classic');document.fonts.load('100px Galada').then(()=>drawLabel(currentFlavor));
+let currentFlavor='classic';
+const metal=new THREE.MeshStandardMaterial({color:0xe6ecee,metalness:1,roughness:.18,envMapIntensity:1.4,side:THREE.DoubleSide});
+const can=new THREE.Group();
+const body=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,2.5,64,1,true),new THREE.MeshPhysicalMaterial({map:labelTex,metalness:.95,roughness:.3,envMapIntensity:1.5,clearcoat:.4,clearcoatRoughness:.2,side:THREE.DoubleSide}));
+can.add(body);
+const cap=pts=>new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),64),metal);
+const topCap=cap([[0,1.6],[.6,1.6],[.66,1.55],[.72,1.5],[.85,1.3],[.9,1.25]]);
+const bot=cap([[.9,-1.25],[.85,-1.3],[.7,-1.5],[.62,-1.58],[0,-1.58]]);
+const lid=new THREE.Mesh(new THREE.CylinderGeometry(.58,.58,.04,48),metal);lid.position.y=1.58;
+const tab=new THREE.Mesh(new THREE.BoxGeometry(.4,.02,.22),metal);tab.position.set(0,1.62,0);
+can.add(topCap,bot,lid,tab);
+can.rotation.z=-.44;scene.add(can);
+
+// --- BERRIES & LEAVES ---
+const berrySpec=[[220,25,30],[100,60,42],[250,30,62],[140,15,48],[120,75,20],[180,45,75],[80,15,40,.7,-1],[70,50,55,.6,-1],[75,80,35,.7,-1]];
+const cherryMat=new THREE.MeshPhysicalMaterial({color:0xc8102e,metalness:.05,roughness:.15,clearcoat:1,clearcoatRoughness:.05});
+const stemMat=new THREE.MeshStandardMaterial({color:0x3a6b2a,roughness:.7});
+const berries=berrySpec.map((s,i)=>{
+  const g=new THREE.Group(),m=cherryMat.clone();
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(.5,32,24),m);ball.scale.y=.92;
+  const stem=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,.4,0),new THREE.Vector3(.1,.8,0),new THREE.Vector3(.35,1.05,0)]),12,.03,6),stemMat);
+  const crown=new THREE.Mesh(new THREE.TorusGeometry(.09,.03,6,5),new THREE.MeshStandardMaterial({color:0x1b2a55}));crown.position.y=.46;crown.rotation.x=Math.PI/2;crown.visible=false;
+  g.add(ball,stem,crown);g.userData={ball,stem,crown,m};scene.add(g);
+  return {g,px:s[0],hx:s[2]/100,hy:s[1]/100,front:s[4]!==-1,op:s[3]||1,ox:0,oy:0,rx:0,ry:0,bx:0,by:0,ang:Math.random()*360,k:0,sc:1,i};
+});
+const leafShape=new THREE.Shape();leafShape.moveTo(0,0);leafShape.quadraticCurveTo(.6,.4,0,1.5);leafShape.quadraticCurveTo(-.6,.4,0,0);
+const leafMat=new THREE.MeshStandardMaterial({color:0x2fa35a,side:THREE.DoubleSide,roughness:.6});
+const leaves=[[15,10,60],[80,40,140],[75,70,80],[20,85,120]].map(s=>{const m=new THREE.Mesh(new THREE.ShapeGeometry(leafShape),leafMat);m.material=leafMat.clone();m.material.transparent=true;m.material.opacity=s[2]>100?.4:1;scene.add(m);return {m,hx:s[0]/100,hy:s[1]/100,px:s[2]}});
+
+function resize(){renderer.setSize(W(),H());camera.aspect=W()/H();camera.updateProjectionMatrix();can.scale.setScalar(narrow()?Math.min(.85,W()/700):Math.min(1.6,W()/700))}
+addEventListener('resize',resize);resize();
+const wh=()=>2*Math.tan(THREE.MathUtils.degToRad(15))*12; // world height at z=0
+let mouse={x:0,y:0,px:-999,py:-999},cm={x:0,y:0},spin=0,switching=false;
+addEventListener('mousemove',e=>{mouse.x=e.clientX/W()-.5;mouse.y=e.clientY/H()-.5;mouse.px=e.clientX;mouse.py=e.clientY});
+
+function frame(){
+  const t=Date.now()*.001,u=wh()/H(); // world units per px
+  cm.x+=(mouse.x-cm.x)*.05;cm.y+=(mouse.y-cm.y)*.05;
+  can.rotation.y=THREE.MathUtils.degToRad(cm.x*40+spin);
+  can.rotation.x=THREE.MathUtils.degToRad(cm.y*20);
+  can.position.y=Math.sin(t*Math.PI/3)*.1+(narrow()?wh()*.17:0); // on mobile the can lives in the top area, above the text
+  berries.forEach(b=>{
+    const cx=b.hx*W(),cy=b.hy*H()*(narrow()?.5:1),par=b.front?60:-30;
+    let hx=cx+cm.x*par,hy=cy+cm.y*par;
+    if(!switching){
+      const dx=mouse.px-hx,dy=mouse.py-hy,d=Math.hypot(dx,dy);let tx=0,ty=0,sm=1;
+      if(d<400){const f=(400-d)/400;tx=dx/d*f*-80;ty=dy/d*f*-80;sm=1+f*5}
+      b.rx+=(tx-b.rx)*.1;b.ry+=(ty-b.ry)*.1;b.ang+=.2*sm;
+    }
+    const dur=[5,7,6,8,5.5,6.5,9,11,10][b.i%9],ph=(t+b.i*.7)*(Math.PI*2/dur);
+    let x=hx+b.rx+b.bx,y=hy+b.ry+b.by+Math.sin(ph)*15;
+    x+=(W()/2-x)*b.k;y+=(H()/2-y)*b.k;
+    const z=b.front?1.5:-2,s=b.px*u*b.sc*(b.front?1:1.15)/1.0;
+    b.g.position.set((x-W()/2)*u*(1+(b.front?-.12:.17)),-(y-H()/2)*u*(1+(b.front?-.12:.17)),z);
+    b.g.scale.setScalar(s*.5*(narrow()?.5:1));
+    b.g.rotation.set(b.ang*.02,b.ang*.017,THREE.MathUtils.degToRad(Math.cos(ph)*6)+b.ang*.004);
+    b.g.userData.m.opacity=b.op*Math.min(1,b.sc*3);b.g.userData.m.transparent=true;
+  });
+  leaves.forEach((l,i)=>{
+    const ph=(t+i*1.2)*(Math.PI*2/(10+i*2));
+    l.m.position.set((l.hx*W()-W()/2-cm.x*15+Math.cos(ph*.5)*15)*u,-(l.hy*H()*(narrow()?.5:1)-H()/2-cm.y*15+Math.sin(ph)*20)*u,-5);
+    l.m.scale.setScalar(l.px*u*1.0);l.m.rotation.z=Math.sin(ph*.3)*.4+i;l.m.rotation.y=t*.3+i;
+  });
+  glEl.style.opacity=intro.v*(narrow()?Math.max(0,1-scrollY/(H()*.45)):1); // fade the 3D scene out as the page scrolls on mobile
+  renderer.render(scene,camera);requestAnimationFrame(frame);
+}
+frame();
+gsap.to(intro,{v:1,duration:1.5,delay:.3});
+
+// --- FLAVOR SWITCH ---
+document.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>{
+  if(switching)return;
+  document.querySelectorAll('.card').forEach(x=>x.classList.remove('active'));c.classList.add('active');
+  switchFlavor(c.dataset.flavor);
+}));
+function switchFlavor(f){
+  if(f===currentFlavor)return;switching=true;
+  const blue=f==='blue',to=blue?{'--bg-inner':'#eef3f8','--bg-mid':'#d6e3ee','--bg-outer':'#b3c4d4'}:{'--bg-inner':'#f7f0e4','--bg-mid':'#ebe1d0','--bg-outer':'#cfc1a8'};
+  gsap.to(document.body,{...to,duration:1.5,ease:'power2.inOut'});
+  const so={v:0,b:0},cv=document.getElementById('gl');
+  gsap.to(so,{v:360,b:15,duration:.6,ease:'power2.in',onUpdate:()=>{spin=so.v;cv.style.filter=`blur(${so.b}px)`},onComplete:()=>{
+    currentFlavor=f;drawLabel(f);
+    gsap.to(so,{v:720,b:0,duration:1.5,ease:'back.out(0.7)',onUpdate:()=>{spin=so.v;cv.style.filter=`blur(${so.b}px)`},onComplete:()=>{spin=0;cv.style.filter='none'}});
+  }});
+  let done=0;
+  berries.forEach(b=>{
+    const nx=(Math.random()-.5)*200,ny=(Math.random()-.5)*200;
+    gsap.timeline()
+    .to(b,{k:1,sc:.1,duration:.5,ease:'power2.in',onComplete:()=>{
+      const d=b.g.userData;d.m.color.set(blue?0x2b4fd8:0xc8102e);d.stem.visible=!blue;d.crown.visible=blue;
+    }})
+    .to(b,{duration:.3})
+    .to(b,{k:0,sc:1,bx:nx,by:ny,rx:0,ry:0,duration:.9,ease:'back.out(1.5)',onComplete:()=>{if(++done===berries.length)switching=false}});
+  });
+}
+
+// --- BUBBLES ---
+const bc=document.getElementById('bubbles');
+setInterval(()=>{
+  const b=document.createElement('div'),s=Math.random()*20+10,d=Math.random()*6+4;
+  b.className='bubble';b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;opacity:${Math.random()*.4+.2};animation-duration:${d}s`;
+  bc.appendChild(b);setTimeout(()=>b.remove(),d*1000);
+},400);
+
+// --- BUTTONS ---
+const toast=document.createElement('div');toast.className='toast';document.body.appendChild(toast);
+let tt;function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2200)}
+const modal=document.createElement('div');modal.className='modal';document.body.appendChild(modal);
+function openModal(title,text,form){
+  modal.innerHTML=`<div class="sheet"><h3>${title}</h3><p>${text}</p>${form?'<input type="email" placeholder="you@email.com" aria-label="Email">':''}<button>${form?'Send':'Close'}</button></div>`;
+  modal.classList.add('open');
+  modal.querySelector('button').onclick=()=>{modal.classList.remove('open');if(form)say('Thanks, we will be in touch.')};
+}
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
+addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+const SECTIONS={Ingredients:'Sparkling water, natural cherry and lime flavor, citric acid and stevia leaf extract. Nothing else.',Taste:'Crisp and bright up front, with a clean cherry finish and no sugar aftertaste.',Eco:'Every can is recyclable aluminium, made with mostly recycled metal.',Reviews:'“Finally a zero soda that tastes like soda.” Early tasters rate it 4.8 out of 5.'};
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',e=>{
+  e.preventDefault();
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));a.classList.add('active');
+  const n=a.textContent;if(SECTIONS[n])openModal(n,SECTIONS[n]);
+}));
+document.querySelectorAll('.arrows button').forEach(b=>b.addEventListener('click',()=>{if(!switching)document.querySelector('.card:not(.active)').click()}));
+let cart=0;
+document.querySelector('.primary-btn').addEventListener('click',()=>{
+  cart++;const n=document.querySelector('.card.active .info span').textContent;
+  say(`Added ${n} to cart (${cart} ${cart>1?'items':'item'})`);
+});
+// --- PAGES ---
+document.querySelectorAll('.nav a,.primary-btn,.contact-btn').forEach(el=>el.replaceWith(el.cloneNode(true)));
+const pg=document.createElement('div');pg.className='page';document.body.appendChild(pg);
+let svgCan=c=>`<svg viewBox="0 0 64 130" width="90"><rect x="8" y="10" width="48" height="112" rx="10" fill="#161616"/><rect x="8" y="98" width="48" height="8" fill="${c}"/><rect x="12" y="10" width="8" height="112" fill="#fff" opacity=".25"/><ellipse cx="32" cy="12" rx="22" ry="6" fill="#cfd6d8"/><circle cx="26" cy="52" r="9" fill="#d4122c" stroke="#fff"/><circle cx="38" cy="49" r="10" fill="#d4122c" stroke="#fff"/><text x="32" y="82" fill="#fff" font-family="Galada" font-size="20" text-anchor="middle">VZ</text></svg>`;
+const tile=(h,p)=>`<div class="tile"><h4>${h}</h4><p>${p}</p></div>`;
+const bar=(l,v)=>`<div class="bar"><span>${l}</span><i><b style="width:${v}%"></b></i></div>`;
+const basket={classic:0,blue:0};
+const shop=()=>`<div class="grid">${[['classic','Diet Classic','#0f9d86'],['blue','Zero Lime','#1666b3']].map(([k,n,c])=>`<div class="tile prod">${svgCan(c)}<h4>${n}</h4><p>$2.99 · 350 ml can</p><div class="qty"><button data-q="${k}" data-d="-1" aria-label="Remove one">−</button><span>${basket[k]}</span><button data-q="${k}" data-d="1" aria-label="Add one">+</button></div></div>`).join('')}</div><div class="total"><span>Total: $${((basket.classic+basket.blue)*2.99).toFixed(2)}</span><button data-checkout>Checkout</button></div>`;
+const PAGES={
+ ingredients:['Ingredients','Five ingredients and zero sugar. Here is everything in the can.',()=>`<div class="grid">${[['Sparkling water','The base, filtered and carbonated for fine, lively bubbles.'],['Natural cherry','Cherry flavor for the bright, clean finish.'],['Natural lime','A light twist of lime in Zero Lime.'],['Citric acid','A gentle tartness that keeps the taste crisp.'],['Stevia leaf extract','Plant-based sweetness with no sugar and no calories.']].map(x=>tile(...x)).join('')}</div><h3>Per 350 ml can</h3><table><tr><td>Energy</td><td>0 kcal</td></tr><tr><td>Sugar</td><td>0 g</td></tr><tr><td>Fat</td><td>0 g</td></tr><tr><td>Sodium</td><td>10 mg</td></tr></table>`],
+ taste:['Taste','Two flavors, both crisp, cold and clean.',()=>`<div class="grid">${[['Diet Classic','Bright cherry up front with a dry, clean finish.',[['Sweetness',30],['Fizz',80],['Tartness',45]]],['Zero Lime','Cool lime and soft cherry, light and zesty.',[['Sweetness',25],['Fizz',85],['Tartness',65]]]].map(([h,p,b])=>`<div class="tile"><h4>${h}</h4><p>${p}</p>${b.map(x=>bar(...x)).join('')}</div>`).join('')}</div>`],
+ eco:['Eco','Made to be finished, then recycled.',()=>`<div class="grid">${[['100%','Recyclable aluminium cans'],['70%','Recycled metal in every can'],['0','Plastic rings or sleeves']].map(([n,t])=>`<div class="tile"><div class="big">${n}</div><p>${t}</p></div>`).join('')}</div>`],
+ reviews:['Reviews','What early tasters say.',()=>`<div class="grid">${[['Aisha K.','★★★★★','Finally a zero soda that tastes like soda. The cherry is spot on.'],['Marco T.','★★★★★','Zero Lime is my new favorite. Very crisp and not too sweet.'],['Priya S.','★★★★☆','Great fizz and no aftertaste. I would love a bigger pack size.']].map(([n,s,t])=>`<div class="tile"><h4>${n} <span style="color:var(--pink)">${s}</span></h4><p>${t}</p></div>`).join('')}</div>`],
+ shop:['Shop','Pick your flavor and quantity.',shop],
+ contact:['Contact us','Questions, orders or wholesale? Send a message and we will reply within two working days.',()=>`<form id="cf"><input required placeholder="Your name" aria-label="Name"><input required type="email" placeholder="you@email.com" aria-label="Email"><textarea required rows="5" placeholder="Your message" aria-label="Message"></textarea><button>Send message</button></form><h3>Or write to us</h3><p class="lead">hello@velvetzero.example<br>Monday to Friday, 9 am to 6 pm</p><p class="credit">Designed by <strong>Aniket Majumdar</strong></p>`]
+};
+function render(p){
+  const d=PAGES[p];
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.textContent.toLowerCase()===(d?p:'home')));
+  if(!d){pg.classList.remove('open');return}
+  pg.innerHTML=`<div class="wrap"><button class="back" data-home>← Back to home</button><h1>${d[0]}</h1><p class="lead">${d[1]}</p>${d[2]()}</div>`;
+  pg.classList.add('open');
+}
+const go=p=>{try{location.hash=p?'/'+p:''}catch(e){}render(p)};
+addEventListener('hashchange',()=>render(location.hash.replace('#/','')));
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const n=a.textContent.toLowerCase();go(n==='home'?'':n)}));
+document.querySelector('.logo').addEventListener('click',()=>go(''));
+document.querySelector('.primary-btn').addEventListener('click',()=>go('shop'));
+document.querySelector('.contact-btn').addEventListener('click',()=>go('contact'));
+pg.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('[data-home]'))return go('');
+  if(t.dataset.q){basket[t.dataset.q]=Math.max(0,basket[t.dataset.q]+ +t.dataset.d);render('shop')}
+  if(t.hasAttribute('data-checkout'))say(basket.classic+basket.blue?'Thanks! This demo store does not take payments yet.':'Add a can first.');
+});
+pg.addEventListener('submit',e=>{e.preventDefault();e.target.outerHTML='<div class="tile"><h4>Message sent</h4><p>Thanks for writing. We will reply within two working days.</p></div>'});
+render(location.hash.replace('#/',''));
+const ai=document.querySelector('.award-icon');ai.setAttribute('role','button');ai.setAttribute('tabindex','0');ai.setAttribute('aria-label','Scroll down');
+ai.addEventListener('click',()=>go('ingredients'));
+ai.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')go('ingredients')});
+addEventListener('wheel',e=>{if(e.deltaY>30&&!narrow()&&!pg.classList.contains('open'))go('ingredients')},{passive:true});
+function canSVG(c,w){
+  const id='g'+Math.random().toString(36).slice(2,7);
+  const body='M20 18H60C66 21 72 28 72 38V104C72 112 68 118 62 122Q40 130 18 122C12 118 8 112 8 104V38C8 28 14 21 20 18Z';
+  let waves='';for(let i=0;i<5;i++){const y=108+i*3.4;waves+=`<path d="M6 ${y}Q23 ${y-7} 40 ${y}T74 ${y}" fill="none" stroke="#dfe7ea" stroke-width=".45" opacity="${.5-i*.07}"/>`}
+  return `<svg viewBox="0 0 80 140" width="${w}"><defs><linearGradient id="${id}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#050505"/><stop offset=".18" stop-color="#383c40"/><stop offset=".36" stop-color="#121314"/><stop offset=".78" stop-color="#0a0a0a"/><stop offset=".93" stop-color="#2c3034"/><stop offset="1" stop-color="#050505"/></linearGradient><clipPath id="${id}c"><path d="${body}"/></clipPath></defs><path d="M18 122Q40 130 62 122V126Q40 135 18 126Z" fill="#aab2b5"/><path d="${body}" fill="url(#${id})"/><g clip-path="url(#${id}c)"><g fill="#e8eef0"><rect x="12" y="30" width="9" height="1.5"/><rect x="58" y="38" width="8" height="1.5"/><rect x="11" y="68" width="6" height="1.3"/><rect x="62" y="64" width="8" height="1.3"/></g><text x="40" y="33" fill="#cfd6d8" font-family="Inter,sans-serif" font-size="4.4" letter-spacing="1.1" text-anchor="middle">ZERO SUGAR</text><circle cx="40" cy="50" r="15" fill="#0b0b0b" stroke="#e8eef0" stroke-width="1.3"/><circle cx="40" cy="50" r="12.6" fill="none" stroke="${c}" stroke-width="1.7" stroke-dasharray="23 56" transform="rotate(110 40 50)"/><path d="M41 42Q43 36 49 37" fill="none" stroke="#3fae5a" stroke-width="1"/><path d="M45 39Q49 33 54 36Q51 41 45 39Z" fill="#2f9c4a"/><circle cx="34.8" cy="53.6" r="5.6" fill="#d4122c" stroke="#fff" stroke-width=".8"/><circle cx="44.6" cy="51.4" r="6.2" fill="#d4122c" stroke="#fff" stroke-width=".8"/><circle cx="42.8" cy="48.8" r="1.4" fill="#fff" opacity=".65"/><circle cx="33" cy="51.5" r="1.2" fill="#fff" opacity=".65"/><text x="40" y="85" fill="#fff" font-family="Galada,cursive" font-size="14" text-anchor="middle">Velvet</text><text x="40" y="99" fill="#fff" font-family="Galada,cursive" font-size="14" text-anchor="middle">Zero</text><rect x="8" y="102" width="64" height="1.6" fill="${c}"/>${waves}<rect x="13" y="34" width="4.5" height="66" rx="2.2" fill="#fff" opacity=".2"/><rect x="63" y="40" width="1.8" height="58" rx=".9" fill="#fff" opacity=".13"/></g><ellipse cx="40" cy="17.5" rx="21" ry="4.6" fill="#cfd6d8"/><ellipse cx="40" cy="17.5" rx="16.5" ry="3.1" fill="#8f989b"/><ellipse cx="40" cy="17" rx="7" ry="1.4" fill="#cfd6d8" opacity=".8"/></svg>`;
+}
+svgCan=c=>canSVG(c,90);
+document.querySelectorAll('.card').forEach(card=>{card.querySelector('svg').outerHTML=canSVG(card.dataset.flavor==='blue'?'#2a86d8':'#13b79c',80)});
+
+</script>
+</body>
+</html>
